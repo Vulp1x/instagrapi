@@ -392,16 +392,7 @@ class PrivateRequestMixin:
 
     def request_log(self, response):
         self.request_logger.info(
-            "%s [%s] %s %s (%s)",
-            self.username,
-            response.status_code,
-            response.request.method,
-            response.url,
-            "{app_version}, {manufacturer} {model}".format(
-                app_version=self.device_settings.get("app_version"),
-                manufacturer=self.device_settings.get("manufacturer"),
-                model=self.device_settings.get("model"),
-            ),
+            f"{self.username} [{response.status_code}] {response.request.method} {response.url} ({self.device_settings.get("app_version")}, {self.device_settings.get("manufacturer")} {self.device_settings.get("model")})"
         )
 
     def private_request(
