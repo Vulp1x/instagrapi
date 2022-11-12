@@ -265,17 +265,7 @@ class UserMixin:
         """
         user_id = str(user_id)
         if not use_cache or user_id not in self._users_cache:
-            try:
-                try:
-                    user = self.user_info_gql(user_id)
-                except ClientLoginRequired as e:
-                    if not self.inject_sessionid_to_public():
-                        raise e
-                    user = self.user_info_gql(user_id)  # retry
-            except Exception as e:
-                if not isinstance(e, ClientError):
-                    self.logger.exception(e)
-                user = self.user_info_v1(user_id)
+            user = self.user_info_v1(user_id)
             self._users_cache[user_id] = user
             self._usernames_cache[user.username] = user.pk
         return deepcopy(
@@ -336,7 +326,7 @@ class UserMixin:
         except ClientError as e:
             self.logger.exception(e)
             return None
-             
+
     def search_users_v1(self, query: str, count: int) -> List[UserShort]:
         """
         Search users by a query (Private Mobile API)
@@ -360,7 +350,7 @@ class UserMixin:
         )
         users = results.get("users", [])
         return [extract_user_short(user) for user in users]
-    
+
     def search_users(self, query: str, count: int = 50) -> List[UserShort]:
         """
         Search users by a query

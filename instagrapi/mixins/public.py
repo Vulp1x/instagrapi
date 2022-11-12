@@ -50,14 +50,14 @@ class PublicRequestMixin:
         super().__init__(*args, **kwargs)
 
     def public_request(
-        self,
-        url,
-        data=None,
-        params=None,
-        headers=None,
-        return_json=False,
-        retries_count=3,
-        retries_timeout=2,
+            self,
+            url,
+            data=None,
+            params=None,
+            headers=None,
+            return_json=False,
+            retries_count=3,
+            retries_timeout=2,
     ):
         kwargs = dict(
             data=data,
@@ -79,10 +79,10 @@ class PublicRequestMixin:
             except ClientError as e:
                 msg = str(e)
                 if all((
-                    isinstance(e, ClientConnectionError),
-                    "SOCKSHTTPSConnectionPool" in msg,
-                    "Max retries exceeded with url" in msg,
-                    "Failed to establish a new connection" in msg
+                        isinstance(e, ClientConnectionError),
+                        "SOCKSHTTPSConnectionPool" in msg,
+                        "Max retries exceeded with url" in msg,
+                        "Failed to establish a new connection" in msg
                 )):
                     raise e
                 if retries_count > iteration + 1:
@@ -92,7 +92,7 @@ class PublicRequestMixin:
                 continue
 
     def _send_public_request(
-        self, url, data=None, params=None, headers=None, return_json=False
+            self, url, data=None, params=None, headers=None, return_json=False
     ):
         self.public_requests_count += 1
         if headers:
@@ -116,12 +116,12 @@ class PublicRequestMixin:
                 )
 
             self.request_logger.debug(
-                "public_request %s: %s", response.status_code, response.url
+                f"public_request { response.status_code}: {response.url}",
             )
 
             self.request_logger.info(
-                "[%s] [%s] %s %s",
-                self.public.proxies.get("https"),
+                f"[{[0]}] [{[1]}] {[2]} {[3]}",
+                self.public.proxies.get("https") or self.public.proxies.get("http"),
                 response.status_code,
                 "POST" if data else "GET",
                 response.url,
@@ -138,7 +138,7 @@ class PublicRequestMixin:
                 raise ClientLoginRequired(e, response=response)
 
             self.request_logger.error(
-                "Status %s: JSONDecodeError in public_request (url=%s) >>> %s",
+                "Status {}: JSONDecodeError in public_request (url={}) >>> {}",
                 response.status_code,
                 response.url,
                 response.text,
@@ -185,13 +185,13 @@ class PublicRequestMixin:
             raise e
 
     def public_graphql_request(
-        self,
-        variables,
-        query_hash=None,
-        query_id=None,
-        data=None,
-        params=None,
-        headers=None,
+            self,
+            variables,
+            query_hash=None,
+            query_id=None,
+            data=None,
+            params=None,
+            headers=None,
     ):
         assert query_id or query_hash, "Must provide valid one of: query_id, query_hash"
         default_params = {"variables": json.dumps(variables, separators=(",", ":"))}

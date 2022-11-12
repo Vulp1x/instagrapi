@@ -18,7 +18,7 @@ class Resource(BaseModel):
 
 
 class User(BaseModel):
-    pk: str
+    pk: int
     username: str
     full_name: str
     is_private: bool
@@ -73,14 +73,17 @@ class Account(BaseModel):
 
 
 class UserShort(BaseModel):
-    pk: str
+    pk: int
     username: Optional[str]
     full_name: Optional[str] = ""
     profile_pic_url: Optional[HttpUrl]
     profile_pic_url_hd: Optional[HttpUrl]
     is_private: Optional[bool]
-    # is_verified: bool  # not found in hashtag_medias_v1
+    is_verified: Optional[bool]  # not found in hashtag_medias_v1
     stories: List = []
+
+    def __hash__(self):
+        return self.pk
 
 
 class Usertag(BaseModel):

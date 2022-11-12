@@ -30,9 +30,7 @@ requirements = [
 
 setup(
     name='instagrapi',
-    version='1.16.29',
-    author='Mikhail Andreev',
-    author_email='x11org@gmail.com',
+    version='2.16.29',
     license='MIT',
     url='https://github.com/adw0rd/instagrapi',
     install_requires=requirements,

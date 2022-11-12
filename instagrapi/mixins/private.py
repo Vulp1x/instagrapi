@@ -160,7 +160,7 @@ class PrivateRequestMixin:
                 "IG-U-IG-DIRECT-REGION-HINT": f"LLA,{self.user_id},{next_year}:01f7bae7d8b131877d8e0ae1493252280d72f6d0d554447cb1dc9049b6b2c507c08605b7",
                 "IG-U-SHBID": f"12695,{self.user_id},{next_year}:01f778d9c9f7546cf3722578fbf9b85143cd6e5132723e5c93f40f55ca0459c8ef8a0d9f",
                 "IG-U-SHBTS": f"{int(time.time())},{self.user_id},{next_year}:01f7ace11925d0388080078d0282b75b8059844855da27e23c90a362270fddfb3fae7e28",
-                "IG-U-RUR": f"RVA,{self.user_id},{next_year}:01f7f627f9ae4ce2874b2e04463efdb184340968b1b006fa88cb4cc69a942a04201e544c", 
+                "IG-U-RUR": f"RVA,{self.user_id},{next_year}:01f7f627f9ae4ce2874b2e04463efdb184340968b1b006fa88cb4cc69a942a04201e544c",
             })
         if self.ig_u_rur:
             headers.update({"IG-U-RUR": self.ig_u_rur})
@@ -250,14 +250,14 @@ class PrivateRequestMixin:
         return dict(data, **{"query_params": json.dumps(params, separators=(",", ":"))})
 
     def _send_private_request(
-        self,
-        endpoint,
-        data=None,
-        params=None,
-        login=False,
-        with_signature=True,
-        headers=None,
-        extra_sig=None,
+            self,
+            endpoint,
+            data=None,
+            params=None,
+            login=False,
+            with_signature=True,
+            headers=None,
+            extra_sig=None,
     ):
         self.last_response = None
         self.last_json = last_json = {}  # for Sentry context in traceback
@@ -288,7 +288,7 @@ class PrivateRequestMixin:
                 self.private.headers.pop('Content-Type', None)
                 response = self.private.get(api_url, params=params)
             self.logger.debug(
-                "private_request %s: %s (%s)", response.status_code, response.url, response.text
+                f"private_request : {response.status_code} {response.url} ({response.text})"
             )
             mid = response.headers.get("ig-set-x-mid")
             if mid:
@@ -298,10 +298,10 @@ class PrivateRequestMixin:
             response.raise_for_status()
             # last_json - for Sentry context in traceback
             self.last_json = last_json = response.json()
-            self.logger.debug("last_json %s", last_json)
+            self.logger.debug(f"last_json {last_json}", )
         except JSONDecodeError as e:
             self.logger.error(
-                "Status %s: JSONDecodeError in private_request (user_id=%s, endpoint=%s) >>> %s",
+                "Status {}: JSONDecodeError in private_request (user_id={}, endpoint={}) >>> {}",
                 response.status_code,
                 self.user_id,
                 endpoint,
@@ -332,8 +332,7 @@ class PrivateRequestMixin:
                     raise FeedbackRequired(
                         **dict(
                             last_json,
-                            message="%s: %s"
-                            % (message, last_json.get("feedback_message")),
+                            message=f"{message}: {last_json.get('feedback_message')}"
                         )
                     )
                 elif error_type == "sentry_block":
@@ -355,7 +354,7 @@ class PrivateRequestMixin:
                 # TODO: Handle last_json with {'message': 'counter get error', 'status': 'fail'}
                 self.logger.exception(e)
                 self.logger.warning(
-                    "Status 400: %s", message or "Empty response message. Maybe enabled Two-factor auth?"
+                    f'Status 400: {message or "Empty response message. Maybe enabled Two-factor auth?"}',
                 )
                 raise ClientBadRequestError(
                     e, response=e.response, **last_json)
@@ -366,7 +365,7 @@ class PrivateRequestMixin:
                 raise ClientThrottledError(e, response=e.response, **last_json)
             elif e.response.status_code == 404:
                 self.logger.warning(
-                    "Status 404: Endpoint %s does not exists", endpoint)
+                    "Status 404: Endpoint {} does not exists", endpoint)
                 raise ClientNotFoundError(e, response=e.response, **last_json)
             elif e.response.status_code == 408:
                 self.logger.warning("Status 408: Request Timeout")
@@ -396,14 +395,14 @@ class PrivateRequestMixin:
         )
 
     def private_request(
-        self,
-        endpoint,
-        data=None,
-        params=None,
-        login=False,
-        with_signature=True,
-        headers=None,
-        extra_sig=None,
+            self,
+            endpoint,
+            data=None,
+            params=None,
+            login=False,
+            with_signature=True,
+            headers=None,
+            extra_sig=None,
     ):
         if self.authorization:
             if not headers:

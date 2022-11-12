@@ -1,7 +1,7 @@
 import random
 from typing import List, Optional, Tuple
 
-from instagrapi.exceptions import ClientError, ClientNotFoundError, MediaNotFound
+from instagrapi.exceptions import ClientError, ClientNotFoundError, MediaNotFound, ClientConnectionError
 from instagrapi.extractors import extract_comment
 from instagrapi.types import Comment
 
@@ -60,7 +60,7 @@ class CommentMixin:
             except ClientError as e:
                 if "Media not found" in str(e):
                     raise MediaNotFound(e, media_id=media_id, **self.last_json)
-                raise e
+                self.logger.warn(f'got exception {e}')
             if amount and len(comments) >= amount:
                 break
         if amount:
