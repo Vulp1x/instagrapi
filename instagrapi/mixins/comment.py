@@ -18,7 +18,7 @@ class CommentMixin:
         Parameters
         ----------
         media_id: str
-            Unique identifier of a Media
+           Full Unique identifier of a Media ("%s_%s" % (media_id, user.pk))
         amount: int, optional
             Maximum number of comments to return, default is 0 - Inf
 
@@ -34,7 +34,6 @@ class CommentMixin:
                 for comment in result.get("comments"):
                     comments.append(extract_comment(comment))
 
-        media_id = self.media_id(media_id)
         params = None
         comments = []
         result = self.private_request(f"media/{media_id}/comments/", params)
