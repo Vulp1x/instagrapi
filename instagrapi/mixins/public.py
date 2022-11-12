@@ -115,16 +115,12 @@ class PublicRequestMixin:
                     response=response,
                 )
 
-            self.request_logger.debug(
-                f"public_request { response.status_code}: {response.url}",
-            )
+            # self.request_logger.debug(
+            #     f"public_request { response.status_code}: {response.url}",
+            # )
 
             self.request_logger.info(
-                f"[{[0]}] [{[1]}] {[2]} {[3]}",
-                self.public.proxies.get("https") or self.public.proxies.get("http"),
-                response.status_code,
-                "POST" if data else "GET",
-                response.url,
+                f'[{self.public.proxies.get("https") or self.public.proxies.get("http"),}] [{response.status_code}] {"POST" if data else "GET",} {response.url,}',
             )
             self.last_public_response = response
             response.raise_for_status()
