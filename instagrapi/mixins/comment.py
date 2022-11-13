@@ -1,7 +1,7 @@
 import random
 from typing import List, Optional, Tuple
 
-from instagrapi.exceptions import ClientError, ClientNotFoundError, MediaNotFound, ClientConnectionError
+from instagrapi.exceptions import ClientError, ClientNotFoundError, MediaNotFound, ClientConnectionError, LoginRequired
 from instagrapi.extractors import extract_comment
 from instagrapi.types import Comment
 
@@ -39,7 +39,7 @@ class CommentMixin:
         result = self.private_request(f"media/{media_id}/comments/", params)
         get_comments()
         while (result.get("has_more_comments") and result.get("next_max_id")) or (
-            result.get("has_more_headload_comments") and result.get("next_min_id")
+                result.get("has_more_headload_comments") and result.get("next_min_id")
         ):
             try:
                 if result.get("has_more_comments"):
@@ -47,9 +47,9 @@ class CommentMixin:
                 else:
                     params = {"min_id": result.get("next_min_id")}
                 if not (
-                    result.get("next_max_id")
-                    or result.get("next_min_id")
-                    or result.get("comments")
+                        result.get("next_max_id")
+                        or result.get("next_min_id")
+                        or result.get("comments")
                 ):
                     break
                 result = self.private_request(f"media/{media_id}/comments/", params)
@@ -57,9 +57,11 @@ class CommentMixin:
             except ClientNotFoundError as e:
                 raise MediaNotFound(e, media_id=media_id, **self.last_json)
             except ClientError as e:
+                self.logger.warning(f'got exception {e}')
                 if "Media not found" in str(e):
                     raise MediaNotFound(e, media_id=media_id, **self.last_json)
-                self.logger.warning(f'got exception {e}')
+                if 'login_required' in str(e):
+                    raise LoginRequired(response=result, **self.last_json)
             if amount and len(comments) >= amount:
                 break
         if amount:
@@ -67,7 +69,7 @@ class CommentMixin:
         return comments
 
     def media_comments_chunk(
-        self, media_id: str, max_amount: int, min_id: str = None
+            self, media_id: str, max_amount: int, min_id: str = None
     ) -> Tuple[List[Comment], str]:
         """
         Get chunk of comments on a media and end_cursor
@@ -116,7 +118,7 @@ class CommentMixin:
         return (comments, result.get("next_min_id"))
 
     def media_comment(
-        self, media_id: str, text: str, replied_to_comment_id: Optional[int] = None
+            self, media_id: str, text: str, replied_to_comment_id: Optional[int] = None
     ) -> Comment:
         """
         Post a comment on a media
