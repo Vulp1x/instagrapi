@@ -59,7 +59,7 @@ class CommentMixin:
             except ClientError as e:
                 if "Media not found" in str(e):
                     raise MediaNotFound(e, media_id=media_id, **self.last_json)
-                self.logger.warn(f'got exception {e}')
+                self.logger.warning(f'got exception {e}')
             if amount and len(comments) >= amount:
                 break
         if amount:
