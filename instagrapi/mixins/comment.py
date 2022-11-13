@@ -61,7 +61,7 @@ class CommentMixin:
                 if "Media not found" in str(e):
                     raise MediaNotFound(e, media_id=media_id, **self.last_json)
                 if 'login_required' in str(e):
-                    raise LoginRequired(response=result, **self.last_json)
+                    raise LoginRequired()
             if amount and len(comments) >= amount:
                 break
         if amount:
