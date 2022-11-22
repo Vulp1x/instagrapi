@@ -21,9 +21,10 @@ from instagrapi.exceptions import (
     PleaseWaitFewMinutes,
     PrivateError,
     ReloginAttemptExceeded,
-    TwoFactorRequired,
+    TwoFactorRequired, ChallengeRequired,
 )
 from instagrapi.utils import dumps, gen_token, generate_jazoest
+
 
 # from instagrapi.zones import CET
 
@@ -189,7 +190,8 @@ class PostLoginFlowMixin:
             "X-CM-Latency": str(random.randint(1, 5)),
         }
         data = {
-            "feed_view_info": "[]",  # e.g. [{"media_id":"2634223601739446191_7450075998","version":24,"media_pct":1.0,"time_info":{"10":63124,"25":63124,"50":63124,"75":63124},"latest_timestamp":1628253523186}]
+            "feed_view_info": "[]",
+            # e.g. [{"media_id":"2634223601739446191_7450075998","version":24,"media_pct":1.0,"time_info":{"10":63124,"25":63124,"50":63124,"75":63124},"latest_timestamp":1628253523186}]
             "phone_id": self.phone_id,
             "battery_level": random.randint(25, 100),
             "timezone_offset": str(self.timezone_offset),
@@ -236,7 +238,8 @@ class PostLoginFlowMixin:
             "timezone_offset": str(self.timezone_offset),
             "tray_session_id": self.tray_session_id,
             "request_id": self.request_id,
-            "latest_preloaded_reel_ids": "[]",  # [{"reel_id":"6009504750","media_count":"15","timestamp":1628253494,"media_ids":"[\"2634301737009283814\",\"2634301789371018685\",\"2634301853921370532\",\"2634301920174570551\",\"2634301973895112725\",\"2634302037581608844\",\"2634302088273817272\",\"2634302822117736694\",\"2634303181452199341\",\"2634303245482345741\",\"2634303317473473894\",\"2634303382971517344\",\"2634303441062726263\",\"2634303502039423893\",\"2634303754729475501\"]"},{"reel_id":"4357392188","media_count":"4","timestamp":1628250613,"media_ids":"[\"2634142331579781054\",\"2634142839803515356\",\"2634150786575125861\",\"2634279566740346641\"]"},{"reel_id":"5931631205","media_count":"7","timestamp":1628253023,"media_ids":"[\"2633699694927154768\",\"2634153361241413763\",\"2634196788830183839\",\"2634219197377323622\",\"2634294221109889541\",\"2634299705648894876\",\"2634299760434939842\"]"}],
+            "latest_preloaded_reel_ids": "[]",
+            # [{"reel_id":"6009504750","media_count":"15","timestamp":1628253494,"media_ids":"[\"2634301737009283814\",\"2634301789371018685\",\"2634301853921370532\",\"2634301920174570551\",\"2634301973895112725\",\"2634302037581608844\",\"2634302088273817272\",\"2634302822117736694\",\"2634303181452199341\",\"2634303245482345741\",\"2634303317473473894\",\"2634303382971517344\",\"2634303441062726263\",\"2634303502039423893\",\"2634303754729475501\"]"},{"reel_id":"4357392188","media_count":"4","timestamp":1628250613,"media_ids":"[\"2634142331579781054\",\"2634142839803515356\",\"2634150786575125861\",\"2634279566740346641\"]"},{"reel_id":"5931631205","media_count":"7","timestamp":1628253023,"media_ids":"[\"2633699694927154768\",\"2634153361241413763\",\"2634196788830183839\",\"2634219197377323622\",\"2634294221109889541\",\"2634299705648894876\",\"2634299760434939842\"]"}],
             "page_size": 50,
             # "_csrftoken": self.token,
             "_uuid": self.uuid,
@@ -329,8 +332,10 @@ class LoginMixin(PreLoginFlowMixin, PostLoginFlowMixin):
         }
         try:
             user = self.user_info_v1(int(user_id))
-        except (PrivateError, ValidationError):
-            user = self.user_short_gql(int(user_id))
+        except (PrivateError, ValidationError) as ex:
+            self.logger.warning(f'failed to get info about yourself: {ex}')
+            raise ChallengeRequired()
+            # user = self.user_short_gql(int(user_id))
         self.username = user.username
         self.cookie_dict["ds_user_id"] = user.pk
         return True
